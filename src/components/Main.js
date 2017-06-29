@@ -2,12 +2,12 @@ require('styles/App.scss');
 import React from 'react';
 import ReactDOM from 'react-dom';
 var imageDatas=require('../data/imageData.json');
-
- imageDatas=(function genImageURL(aImageData){
-		for(var i=0,j=aImageData.length;i<j;i++){
-			var singleImageData =aImageData[i];
-			singleImageData.imageURL=require('../images/'+singleImageData.fileName);
-			aImageData[i]=singleImageData;
+//
+ imageDatas = (function genImageURL(aImageData){
+		for(var i = 0,j = aImageData.length;i < j;i++){
+			var singleImageData = aImageData[i];
+			singleImageData.imageURL = require('../images/'+singleImageData.fileName);
+			aImageData[i] = singleImageData;
 		}
 		return aImageData;
 	})(imageDatas);
@@ -74,8 +74,51 @@ class ImgFigure extends React.Component {
 		)
 	}
 }
+
+class ControllerUnits extends React.Component {
+	constructor(props){
+		super(props);
+		
+		this.handleClick=this.handleClick.bind(this);
+	}
+
+	handleClick(e){
+		
+		//如果點到的圖片是已經居中，就翻轉。如果不是就把該圖片居中
+		if(this.props.arrange.isCenter){
+			this.props.inverse();
+		}else{
+			this.props.center();
+		}
+		
+		e.stopPropagation();
+		e.preventDefault();
+	}
+
+
+	render(){
+		var controllerUnitClassName = 'controller-unit';
+		
+		//如果對應的是居中的圖片，則顯示居中的狀態
+		if(this.props.arrange.isCenter){
+			controllerUnitClassName += ' is-center';
+			
+			//如果該圖片是翻轉過的 ，則顯示翻轉的狀態
+			if(this.props.arrange.isInverse){
+				controllerUnitClassName += ' is-inverse';
+			}
+		}
+		return (
+		
+			<span className={controllerUnitClassName} onClick={this.handleClick} >
+			
+			</span>
+		
+		)
 	
 	
+	}
+}
 class AppComponent extends React.Component {
 	/*
 	 *也就是说 通过es6类的继承实现时 state的初始化要在constructor中声明 ,無法用
@@ -177,7 +220,7 @@ class AppComponent extends React.Component {
 			vPosRangeX = vPosRange.x,
 			
 			aImgsRangeTop= [],
-			topImgNum =Math.ceil(Math.random()*2),//取一個或不取
+			topImgNum =Math.floor(Math.random()*2),//取一個或不取
 			topImgSpliceIndex =0,
 			aImgsRangeCenter = aImgsRange.splice(centerIndex,1);
 
@@ -228,6 +271,8 @@ class AppComponent extends React.Component {
 					isCenter:false
 				}
 			}
+			
+
 			
 			if(aImgsRangeTop && aImgsRangeTop[0] ){
 				aImgsRange.splice(topImgSpliceIndex,0,aImgsRangeTop[0]);
@@ -314,7 +359,10 @@ class AppComponent extends React.Component {
 				}
 			}
 		
-			imgFigures.push(<ImgFigure data={value} ref={'imgFigure'+index} arrange={this.state.aImgsRange[index]} inverse={this.inverse(index)} center = {this.center(index)}/>)
+			//key 是為了優化
+			imgFigures.push(<ImgFigure data={value} key={index} ref={'imgFigure'+index} arrange={this.state.aImgsRange[index]} inverse={this.inverse(index)} center = {this.center(index)}/>);
+			
+			controllerUnits.push(<ControllerUnits key={index} arrange={this.state.aImgsRange[index]} inverse={this.inverse(index)} center={this.center(index)} />);
 		}.bind(this));
   
     return (
